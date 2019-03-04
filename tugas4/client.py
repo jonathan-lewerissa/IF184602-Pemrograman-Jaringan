@@ -34,11 +34,12 @@ while True:
                         break
         else:
             message = raw_input()
+            message_parse = message.split()
 
-            server.send(str(message))
+            server.send(str(message_parse[1]))
             sleep(0.5)
 
-            with open(message,'rb') as f:
+            with open(message_parse[1],'rb') as f:
                 for chunk in iter(partial(f.read,2048),b''):
                     server.send(chunk)
             server.send('ENDSEND')
