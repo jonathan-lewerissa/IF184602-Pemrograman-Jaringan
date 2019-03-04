@@ -24,7 +24,7 @@ def clientthread(conn, addr):
                 print "<" + addr[0] + "> " + message
 
                 message_to_send = "<" + addr[0] + "> " + message
-                broadcast(message_to_send,conn)
+                broadcast(message,conn)
             else:
                 remove(conn) 
         except:
