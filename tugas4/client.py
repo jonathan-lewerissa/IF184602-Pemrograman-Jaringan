@@ -1,6 +1,8 @@
 import socket
 import select
 import sys
+from functools import partial
+from time import sleep
 
 server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 ip_address = '127.0.0.1'
@@ -21,25 +23,26 @@ while True:
         if socks == server:
             message = socks.recv(2048)
             print 'Header: ' + str(message)
-            message = message.split(":")
-            name = str(message[1]).strip()
+            name = str(message)
 
             with open(base_folder+'/'+name,'wb') as f:
-                message = socks.recv(2048)
-                print message
-                f.write(message)
-                # if str(message) != 'ENDSEND':
-                    # f.write(message)
+                l = socks.recv(2048)
+                while l:
+                    f.write(l)
+                    l = socks.recv(2048)
+                    if str(l) == 'ENDSEND':
+                        break
         else:
             message = raw_input()
-            message = message.split()
 
-            server.send(str('SEND:'+message[1]+'\n'))
+            server.send(str(message))
+            sleep(0.5)
 
-            with open(message[1],'rb') as f:
-                for line in f:
-                    server.send(str(line))
-            server.send(str('\n'))
+            with open(message,'rb') as f:
+                for chunk in iter(partial(f.read,2048),b''):
+                    server.send(chunk)
+            server.send('ENDSEND')
+            sleep(0.5)
 
             sys.stdout.write("<You>")
             sys.stdout.write(str(message))
